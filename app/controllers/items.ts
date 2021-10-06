@@ -77,41 +77,32 @@ export async function selltem(req: Request, res: Response): Promise<Response> {
     const currentDateSinceEpoch = Date.now();
 
     const unexpiredItemsCount = await Item.findAll({
-      attributes: [
-        [
-          Sequelize.fn("sum", Sequelize.col("quantity")),
-          "quantityOfNonExpired",
-        ],
-      ],
+      attributes: [[Sequelize.fn("sum", Sequelize.col("quantity")), "quantityOfNonExpired"]],
       raw: true,
-
       where: {
         itemName: itemName,
         expiry: { [Op.gt]: currentDateSinceEpoch },
       },
     });
-     
-
     if (unexpiredItemsCount[0].quantityOfNonExpired != 0) {
       const quantityNonExpiredAvailableToBeSold = unexpiredItemsCount[0].quantityOfNonExpired;
       if (  quantityNonExpiredAvailableToBeSold >= itemQuantityRequestedToBeSold ) {
-        const makeSales = await sequelize.query(
-          "update items it join( select * from( select *, case when cumulsum <= TotalRequiredQuantity then 0 else cumulsum-TotalRequiredQuantity end NewQuantity from(select *, " +
-            itemQuantityRequestedToBeSold +
-            ' TotalRequiredQuantity, sum(quantity) over(partition by itemName order by expiry) cumulsum from items where itemName = "' +
-            itemName +
-            '" AND expiry > "' +
-            currentDateSinceEpoch +
-            '" AND quantity > 0 )q )q1  where quantity>=NewQuantity)cte on it.id=cte.id  set it.quantity = NewQuantity'
-        );
-        // console.log(makeSales);
-        if (makeSales) {
-          return res.status(201).send({});
-        } else {
-          return res.status(400).send({
-            message: "Error while selling item",
-          });
-        }
+          const makeSales = await sequelize.query(
+            "update items it join( select * from( select *, case when cumulsum <= TotalRequiredQuantity then 0 else cumulsum-TotalRequiredQuantity end NewQuantity from(select *, " +
+              itemQuantityRequestedToBeSold +
+              ' TotalRequiredQuantity, sum(quantity) over(partition by itemName order by expiry) cumulsum from items where itemName = "' +
+              itemName +
+              '" AND expiry > "' +
+              currentDateSinceEpoch +
+              '" AND quantity > 0 )q )q1  where quantity>=NewQuantity)cte on it.id=cte.id  set it.quantity = NewQuantity'
+          );
+          if (makeSales) {
+            return res.status(201).send({});
+          } else {
+            return res.status(400).send({
+              message: "Error while selling item",
+            });
+          }
       } else {
         return res.status(400).send({
           quantityRequestedToBeSold: itemQuantityRequestedToBeSold,
