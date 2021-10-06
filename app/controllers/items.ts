@@ -149,7 +149,6 @@ cron.schedule("0 0 */6 * * *", async () => {
 // delete item with 0 quantity based on my sell api
 cron.schedule("0 0 */1 * * *", async () => {
 
-  const currentDateSinceEpoch = Date.now();
   try {
     const deletePurchasedItem = await Item.destroy({
       where: { quantity: 0 },
