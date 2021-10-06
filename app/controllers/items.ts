@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Op, Sequelize } from "sequelize";
 import { Item } from "../models/items";
-import * as schedule from "node-schedule";
+import cron from "node-cron";
 import { sequelize } from "../sequelize";
 
 // Add new item
@@ -134,7 +134,7 @@ export async function selltem(req: Request, res: Response): Promise<Response> {
 }
 
 // job that delete expired item periodically runs every 6 hours
-schedule.scheduleJob("0 0 */6 * * *", async () => {
+cron.schedule("0 0 */6 * * *", async () => {
   const currentDateSinceEpoch = Date.now();
   try {
     const deleteCart = await Item.destroy({
@@ -147,7 +147,7 @@ schedule.scheduleJob("0 0 */6 * * *", async () => {
 });
 
 // delete item with 0 quantity based on my sell api
-schedule.scheduleJob("0 0 */1 * * *", async () => {
+cron.schedule("0 0 */1 * * *", async () => {
 
   const currentDateSinceEpoch = Date.now();
   try {

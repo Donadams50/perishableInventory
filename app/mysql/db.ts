@@ -9,7 +9,7 @@ export const db = mysql.createConnection({
   database: config.database,
   password: config.password,
   waitForConnections: true,
-  connectionLimit: 10000,
+  connectionLimit: 100,
   queueLimit: 1,
 });
 
