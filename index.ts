@@ -1,7 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import routes from "./app/routes";
 
-const app: Application = express();
+const app = express();
 const port = 8000;
 
 // Body parsing Middleware
@@ -26,3 +26,5 @@ try {
   console.error(`Error occured: ${error}`);
 }
  
+// Export our app for testing purposes
+export default app;
