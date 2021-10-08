@@ -6,37 +6,37 @@ import { sequelize } from "../sequelize";
 
 // Add new item
 export async function addNewItem( req: Request, res: Response): Promise<Response> {
+  //start a new transaction
   let transaction = await sequelize.transaction();
   try {
-     //start a new transaction
-     const  quantity= req.body.quantity
-     const  expiry = req.body.expiry
-     const  itemName =req.params.name.toLowerCase()
-     const item = {
-        quantity:req.body.quantity,
-        expiry :req.body.expiry,
-        itemName :req.params.name.toLowerCase()
-     }
-      const isItemEXist = await Item.findOne({  where: { itemName: itemName, expiry : expiry }});
-   
+     
+      const  quantity= req.body.quantity
+      const  expiry = req.body.expiry
+      const  itemName =req.params.name.toLowerCase()
+      const  item = {
+          quantity:req.body.quantity,
+          expiry :req.body.expiry,
+          itemName :req.params.name.toLowerCase()
+      }
+        const isItemEXist = await Item.findOne({  where: { itemName: itemName, expiry : expiry }});
+    
       if (isItemEXist) {
         const newQuantity = quantity + isItemEXist.quantity
         const itemId = isItemEXist.id
-        const checkOut = await Item.update({ quantity : newQuantity } , {where :{ id: itemId}, } )
+        const checkuOut = await Item.update({ quantity : newQuantity } , {where :{ id: itemId}, } )
       } else {
         const saveditem = await Item.create({ ...item, },    { transaction });
       }
       await transaction.commit();
       return res.status(200).send({});
-      }
-    
+  }
   catch (error) {
-    if (transaction) {
-      await transaction.rollback();
-    }
-    return res.status(400).send({
-      message: "Error while adding new item",
-    });
+      if (transaction) {
+        await transaction.rollback();
+      }
+      return res.status(400).send({
+        message: "Error while adding new item",
+      });
   }
 }
 
@@ -69,7 +69,7 @@ export async function getItems(req: Request, res: Response): Promise<Response> {
   }
 }
 
-//sell an item
+//Sell an item
 export async function selltem(req: Request, res: Response): Promise<Response> {
   try {
     const itemName = req.params.name.toLowerCase();
@@ -128,12 +128,11 @@ export async function selltem(req: Request, res: Response): Promise<Response> {
 cron.schedule("0 0 */6 * * *", async () => {
   const currentDateSinceEpoch = Date.now();
   try {
-    const deleteCart = await Item.destroy({
-      where: { expiry: { [Op.lte]: currentDateSinceEpoch } },
-    });
-    console.log(currentDateSinceEpoch);
+
+     await Item.destroy({ where: { expiry: { [Op.lte]: currentDateSinceEpoch } }});
+
   } catch (err) {
-    return err;
+     return err;
   }
 });
 
@@ -141,10 +140,8 @@ cron.schedule("0 0 */6 * * *", async () => {
 cron.schedule("0 0 */1 * * *", async () => {
 
   try {
-    const deletePurchasedItem = await Item.destroy({
-      where: { quantity: 0 },
-    });
-    console.log(deletePurchasedItem);
+     await Item.destroy({ where: { quantity: 0 }});
+    
   } catch (err) {
     return err;
   }

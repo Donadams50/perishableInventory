@@ -6,9 +6,8 @@
   "scripts": {
     "start": "ts-node-dev ./index.ts",
     "test": "jest "
-   
   },
-  "author": "Adam",
+  "author": " Alaka Adam",
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.2.22",

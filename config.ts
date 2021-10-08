@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 // Parsing the env file.
 dotenv.config({ path: path.resolve(__dirname, "../config/config.env") });
 
-
 interface ENV {
 
   database: string | undefined;
